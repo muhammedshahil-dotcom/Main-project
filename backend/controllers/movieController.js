@@ -23,11 +23,29 @@ export const addMovie = async (req, res) => {
 }
 
 //Get all movies
-export const  getMovies = async (req, res) => {
+export const getMovies = async (req, res) => {
     try {
         const movies = await Movie.find().populate("genre")
         res.json(movies)
     } catch (error) {
         res.status(500).json({ message: "Failed to get movies", error: error.message });
     }
-}
+};
+
+//Delete movie (Admins only)
+export const deleteMovie = async (req, res) => {
+    try {
+        const movie = await Movie.findById(req.params.id);
+
+        if (!movie) {
+            return res.status(404).json({ message: "Movie not found" });
+        }
+
+        await movie.deleteOne();
+        res.json({ message: "Movie deleted successfully" });
+    } catch (error) {
+        res
+            .status(500)
+            .json({ message: "Failed to delete movie", error: error.message });
+    }
+};
