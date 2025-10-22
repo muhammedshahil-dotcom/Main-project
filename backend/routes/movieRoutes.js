@@ -1,17 +1,23 @@
 import express from "express";
 import upload from "../middleware/uploadMiddleware.js";
-import {addMovie, getMovies, deleteMovie, } from "../controllers/movieController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
+import {
+  addMovie,
+  getAllMovies,
+  getMovieById,
+  updateMovie,
+  deleteMovie,
+} from "../controllers/movieController.js";
 
 const router = express.Router();
 
-// Get all movies
-router.get("/", getMovies);
+// Public
+router.get("/", getAllMovies);
+router.get("/:id", getMovieById);
 
-// Add a movie 
-router.post("/", protect, upload.single("poster"), addMovie);
-
-// Delete a movie 
-router.delete("/:id", protect, deleteMovie);
+// Admin routes
+router.post("/", protect, admin, upload.single("poster"), addMovie);
+router.put("/:id", protect, admin, upload.single("poster"), updateMovie);
+router.delete("/:id", protect, admin, deleteMovie);
 
 export default router;

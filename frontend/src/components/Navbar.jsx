@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { User } from "lucide-react"; // user icon
+import logo from "../assets/logo.png"; // logo image
+
 
 function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -15,8 +17,8 @@ function Navbar() {
   return (
     <nav className="bg-gray-900 text-white px-6 py-4 shadow-lg flex justify-between items-center">
       {/* Logo */}
-      <Link to="/" className="text-xl font-bold hover:text-indigo-400 transition">
-        🎥 MovieApp
+      <Link to="/" >
+        <img src={logo} alt="CineRate Logo" className="w-40 h-auto mr-3" />
       </Link>
 
       {/* Links */}

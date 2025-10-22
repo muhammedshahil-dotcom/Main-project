@@ -8,17 +8,17 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true); // Add loading state
 
-useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
+    useEffect(() => {
+        const savedToken = localStorage.getItem("token");
+        const savedUser = localStorage.getItem("user");
 
-    if (savedToken && savedUser && savedUser !== "undefined") {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
-}, []);
-    
+        if (savedToken && savedUser && savedUser !== "undefined") {
+            setToken(savedToken);
+            setUser(JSON.parse(savedUser));
+        }
+        setLoading(false);
+    }, []);
+
 
 
     const login = async (credentials) => {
