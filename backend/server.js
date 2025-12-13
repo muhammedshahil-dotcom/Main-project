@@ -14,6 +14,8 @@ import feedbackRoutes from "./routes/feedbackRoutes.js";
 import watchlistRoutes from "./routes/watchlistRoutes.js";
 import userRoutes from "./routes/userRoutes.js"; // Import userRoutes
 
+
+
 dotenv.config();
 const app = express();
 
@@ -42,6 +44,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/feedbacks", feedbackRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/users", userRoutes); // Use userRoutes
+
 
 // Test route
 app.get("/", (req, res) => {

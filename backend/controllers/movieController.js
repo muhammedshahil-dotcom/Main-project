@@ -3,22 +3,26 @@ import Movie from "../models/Movie.js";
 // ✅ Add movie
 export const addMovie = async (req, res) => {
   try {
-    const { title, description, releaseDate, genre } = req.body;
+    const { title, description, genre, releaseDate } = req.body;
 
     const movie = new Movie({
       title,
       description,
+      genre: genre.split(",").map(g => g.trim()), // convert "Action, Sci-Fi" to array
       releaseDate,
-      genre,
-      posterUrl: req.file ? req.file.path : null,
+      posterUrl: req.files.poster ? req.files.poster[0].path : null,
+      bannerUrl: req.files.banner ? req.files.banner[0].path : null,
+      gallery: req.files.gallery ? req.files.gallery.map(file => file.path) : [],
     });
 
     await movie.save();
-    res.status(201).json({ message: "Movie added successfully", movie });
+    res.status(201).json({ message: "Movie added successfully!", movie });
+
   } catch (error) {
     res.status(500).json({ message: "Failed to add movie", error: error.message });
   }
 };
+
 
 // ✅ Get all movies
 export const getAllMovies = async (req, res) => {
@@ -55,6 +59,7 @@ export const updateMovie = async (req, res) => {
     };
 
     if (req.file) updatedData.posterUrl = req.file.path;
+    if (req.files && req.files.banner) updatedData.bannerUrl = req.files.banner[0].path;
 
     const movie = await Movie.findByIdAndUpdate(req.params.id, updatedData, { new: true });
 

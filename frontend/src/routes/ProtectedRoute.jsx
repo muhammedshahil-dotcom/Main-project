@@ -1,16 +1,15 @@
-import { useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
+const ProtectedRoute = ({ children, role }) => {
+  const { user } = useContext(AuthContext);
 
-const ProtectedRoutes = ({ children }) => {
-    const { user } = useContext(AuthContext);
+  if (!user) return <Navigate to="/login" />;
 
-    if (!user) {
-        return <Navigate to="/login" replace />;
-    }
+  if (role && user.role !== role) return <Navigate to="/" />;
 
-    return children;
+  return children;
 };
 
-export default ProtectedRoutes;
+export default ProtectedRoute;

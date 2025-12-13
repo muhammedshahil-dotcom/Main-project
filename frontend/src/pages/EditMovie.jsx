@@ -14,6 +14,7 @@ function EditMovie() {
   const [genre, setGenre] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [poster, setPoster] = useState(null);
+  const [banner, setBanner] = useState(null);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -40,15 +41,22 @@ function EditMovie() {
     formData.append("description", description);
     formData.append("genre", genre);
     formData.append("releaseDate", releaseDate);
-    if (poster) formData.append("poster", poster);
+
+    if (poster) {
+      formData.append("poster", poster);
+    }
+
+    if (banner) {
+      formData.append("banner", banner);
+    }
 
     try {
       await updateMovie(id, formData, token);
       alert("Movie updated successfully!");
-      navigate("/");
-    } catch (error) {
-      alert("Failed to update movie.");
-      console.error(error);
+      navigate("/admin/movies");
+    } catch (err) {
+      alert("Failed to update movie");
+      console.log(err);
     }
   };
 
@@ -111,6 +119,19 @@ function EditMovie() {
             onChange={(e) => setPoster(e.target.files[0])}
           />
         </label>
+
+        <label className="block mb-2">Current Banner:</label>
+        <img
+          src={`${import.meta.env.VITE_API_URL}/${movie.bannerUrl}`}
+          alt="banner"
+          className="w-full h-40 object-cover rounded-md mb-4"
+        />
+
+        <div className="mb-4">
+          <label className="block mb-1 font-medium">Upload New Banner</label>
+          <input type="file" accept="image/*" onChange={(e) => setBanner(e.target.files[0])} />
+        </div>
+
 
         <button
           type="submit"

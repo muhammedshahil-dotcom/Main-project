@@ -1,16 +1,56 @@
 import mongoose from "mongoose";
 
-const movieSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    description: { type: String },
-    releaseDate: { type: Date },
-    posterUrl: { type: String },   
-    trailerUrl: { type: String },
-    averageRating: { type: Number, default: 0 },
-    genre: { type: mongoose.Schema.Types.ObjectId, ref: "Genre" },
-    createdAt: { type: Date, default: Date.now }
-});
+const movieSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    genre: {
+      type: [String], // Supports multiple genres like ["Sci-Fi", "Adventure"]
+      required: true,
+    },
+    releaseDate: {
+      type: Date,
+      required: true,
+    },
 
-const Movie = mongoose.model("Movie", movieSchema);
+    // 🔥 Main poster (vertical image)
+    posterUrl: {
+      type: String,
+      default: null,
+    },
 
-export default Movie;
+    // 🔥 Banner (Netflix-style widescreen header)
+    bannerUrl: {
+      type: String,
+      default: null,
+    },
+
+    // 🎞 Extra images if needed
+    gallery: {
+      type: [String],
+      default: [],
+    },
+
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    bannerUrl: {
+      type: String,
+      required: false
+    }
+
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("Movie", movieSchema);

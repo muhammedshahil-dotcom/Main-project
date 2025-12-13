@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import Background from "../components/Background";
+import Background from "../components/Background Animations/Background";
 
 function Register() {
   const [name, setName] = useState("");

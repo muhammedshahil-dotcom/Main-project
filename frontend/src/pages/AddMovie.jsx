@@ -4,103 +4,109 @@ import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-function AddMovie() {
-  const { token, user } = useContext(AuthContext);
+export default function AddMovie() {
+  const { user, token } = useContext(AuthContext);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [genre, setGenre] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [poster, setPoster] = useState(null);
+  const [gallery, setGallery] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [banner, setBanner] = useState(null);
+  
 
-  // ✅ Handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (user?.role !== "admin") {
-      setError("Only admins can add movies!");
+    if (!token || user?.role !== "admin") {
+      setError("❌ Only Admins Can Add Movies!");
       return;
     }
+
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("genre", genre);
     formData.append("releaseDate", releaseDate);
+
     if (poster) formData.append("poster", poster);
+    if (banner) formData.append("banner", banner);
+
+    if (gallery.length > 0) {
+      for (let img of gallery) {
+        formData.append("gallery", img);
+      }
+    }
 
     try {
       await addMovie(formData, token);
-      setMessage("✅ Movie added successfully!");
+      setMessage("🎉 Movie added successfully!");
       setError("");
       setTitle("");
       setDescription("");
       setGenre("");
       setReleaseDate("");
       setPoster(null);
-    } catch (err) {
-      console.error("❌ Add movie failed:", err);
-      setError("Failed to add movie. Try again.");
-      setMessage("");
+      setGallery([]);
+    } catch {
+      setError("❌ Failed to add movie. Try again.");
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       <Navbar />
 
-      <main className="flex-grow flex justify-center items-center px-4 py-10">
-        <div className="bg-gray-900 p-8 rounded-xl w-full max-w-lg border border-gray-800 shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center">🎬 Add New Movie</h2>
+      <main className="flex-grow px-5 md:px-10 py-10">
+        <div className="max-w-3xl mx-auto bg-[#141414] p-10 rounded-2xl border border-gray-800 shadow-[0_0_40px_#000]">
+
+          <h1 className="text-3xl font-extrabold mb-6 tracking-wide text-red-600">
+            🎬 Add Movie (Admin Panel)
+          </h1>
 
           {message && <p className="text-green-400 mb-4">{message}</p>}
-          {error && <p className="text-red-400 mb-4">{error}</p>}
+          {error && <p className="text-red-500 mb-4">{error}</p>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-gray-300">Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full mt-1 p-2 bg-gray-800 text-white rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <input
+              placeholder="Movie Title"
+              className="w-full bg-[#1f1f1f] p-3 rounded-lg outline-none border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-red-600"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
 
-            <div>
-              <label className="block text-gray-300">Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows="3"
-                className="w-full mt-1 p-2 bg-gray-800 text-white rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              ></textarea>
-            </div>
+            <textarea
+              placeholder="Movie Description"
+              className="w-full bg-[#1f1f1f] p-3 h-28 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-red-600"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
 
-            <div>
-              <label className="block text-gray-300">Genre</label>
-              <input
-                type="text"
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                className="w-full mt-1 p-2 bg-gray-800 text-white rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+            <input
+              placeholder="Genre (ex: Action, Drama, Thriller)"
+              className="w-full bg-[#1f1f1f] p-3 rounded-lg border border-gray-700 text-white focus:ring-2 focus:ring-red-600"
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+              required
+            />
 
-            <div>
-              <label className="block text-gray-300">Release Date</label>
-              <input
-                type="date"
-                value={releaseDate}
-                onChange={(e) => setReleaseDate(e.target.value)}
-                className="w-full mt-1 p-2 bg-gray-800 text-white rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+            <input
+              type="date"
+              className="w-full bg-[#1f1f1f] p-3 rounded-lg border border-gray-700 text-white focus:ring-2 focus:ring-red-600"
+              value={releaseDate}
+              onChange={(e) => setReleaseDate(e.target.value)}
+              required
+            />
 
             <div>
               <label className="block text-gray-300">Poster</label>
@@ -112,11 +118,33 @@ function AddMovie() {
               />
             </div>
 
+            <div>
+              <label className="block text-gray-300">Banner</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setBanner(e.target.files[0])}
+                className="w-full mt-1 p-2 bg-gray-800 text-white rounded-md outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-300">Gallery (Max 10)</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => setGallery([...e.target.files])}
+                className="w-full mt-1 p-2 bg-gray-800 text-white rounded-md outline-none"
+              />
+            </div>
+
+
             <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md font-semibold transition"
+              disabled={loading}
+              className="w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg font-bold transition duration-150 disabled:bg-gray-700"
             >
-              Add Movie
+              {loading ? "Uploading..." : "Add Movie"}
             </button>
           </form>
         </div>
@@ -126,5 +154,3 @@ function AddMovie() {
     </div>
   );
 }
-
-export default AddMovie;

@@ -11,13 +11,34 @@ import {
 
 const router = express.Router();
 
-// Public
+// Public Routes
 router.get("/", getAllMovies);
 router.get("/:id", getMovieById);
 
-// Admin routes
-router.post("/", protect, admin, upload.single("poster"), addMovie);
-router.put("/:id", protect, admin, upload.single("poster"), updateMovie);
+// Admin Routes
+router.post("/",
+  protect,
+  admin,
+  upload.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "banner", maxCount: 1 },
+    { name: "gallery", maxCount: 10 }
+  ]),
+  addMovie
+);
+
+router.put(
+  "/:id",
+  protect,
+  admin,
+  upload.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "gallery", maxCount: 10 },
+    { name: "banner", maxCount: 1 }
+  ]),
+  updateMovie
+);
+
 router.delete("/:id", protect, admin, deleteMovie);
 
 export default router;
