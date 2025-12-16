@@ -23,8 +23,6 @@ const app = express();
 connectDB();
 
 // CORS configuration
-import cors from "cors";
-
 app.use(
   cors({
     origin: [
