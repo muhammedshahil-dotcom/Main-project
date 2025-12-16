@@ -23,15 +23,19 @@ const app = express();
 connectDB();
 
 // CORS configuration
+import cors from "cors";
+
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://your-vercel-frontend-url.vercel.app"
+      "https://cinerate-e4c45ix2d-muhammedshahil-dotcoms-projects.vercel.app"
     ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   })
 );
+
 
 // Middleware
 app.use(express.json());
