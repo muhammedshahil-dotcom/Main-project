@@ -21,6 +21,7 @@ const app = express();
 
 // Connect to DB
 connectDB();
+
 // CORS configuration
 app.use(
   cors({
