@@ -16,13 +16,12 @@ function Home() {
   const navigate = useNavigate();
   const rowRef = useRef(null);
 
-  const imageBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const imageBase = import.meta.env.VITE_API_URL;
 
   const filteredMovies = movies.filter((m) =>
     m.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Fetch movies
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -37,22 +36,19 @@ function Home() {
     fetchMovies();
   }, []);
 
-  // Auto banner slide
   useEffect(() => {
-    if (movies.length === 0) return;
-
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % movies.length);
-    }, 5000);
-
+    if (!movies.length) return;
+    const timer = setInterval(
+      () => setCurrentIndex((p) => (p + 1) % movies.length),
+      5000
+    );
     return () => clearInterval(timer);
   }, [movies]);
 
   const heroMovie = movies[currentIndex];
 
   const scroll = (dir) => {
-    if (!rowRef.current) return;
-    rowRef.current.scrollBy({
+    rowRef.current?.scrollBy({
       left: dir === "left" ? -300 : 300,
       behavior: "smooth",
     });
@@ -69,44 +65,40 @@ function Home() {
     <div className="bg-black text-white min-h-screen">
       <Navbar />
 
-
-
       {/* 🎬 HERO BANNER */}
-
-      {/* 🔍 SEARCH INSIDE BANNER */}
-      <div className="absolute top-24 left-6 z-20 w-full max-w-md">
-        <input
-          type="text"
-          placeholder="Search movies..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-black/70 text-white px-4 py-2 rounded-lg outline-none
-               placeholder-gray-400 backdrop-blur"
-        />
-      </div>
-
       {heroMovie && (
         <div
-          className="relative h-[70vh] w-full flex flex-col justify-end p-10 bg-cover bg-center transition-all duration-[1200ms]"
+          className="relative h-[55vh] md:h-[70vh] w-full bg-cover bg-center flex flex-col justify-end px-6 md:px-10 pb-10"
           style={{
-            backgroundImage: `url(${imageBase}/${heroMovie.bannerUrl?.replace(
-              /\\/g,
-              "/"
-            ) || heroMovie.posterUrl})`,
+            backgroundImage: `url(${imageBase}/${heroMovie.bannerUrl?.replace(/\\/g, "/") || heroMovie.posterUrl})`,
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+
+          {/* SEARCH */}
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[90%] md:w-1/2 z-20">
+            <input
+              type="text"
+              placeholder="Search movies..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-black/70 text-white px-4 py-2 rounded-lg backdrop-blur outline-none"
+            />
+          </div>
 
           <div className="relative z-10 max-w-xl">
-            <h1 className="text-5xl font-bold">{heroMovie.title}</h1>
-            <p className="mt-3 text-gray-300 line-clamp-3">
+            <h1 className="text-2xl md:text-5xl font-bold">
+              {heroMovie.title}
+            </h1>
+
+            <p className="mt-2 md:mt-3 text-sm md:text-base text-gray-300 line-clamp-3">
               {heroMovie.description}
             </p>
 
-            <div className="mt-6 space-x-4">
+            <div className="mt-4 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => navigate(`/movies/${heroMovie._id}`)}
-                className="bg-red-600 px-6 py-2 rounded-lg hover:bg-red-700 font-semibold"
+                className="bg-red-600 px-5 py-2 rounded-lg hover:bg-red-700"
               >
                 ⭐ Rate & Review
               </button>
@@ -114,7 +106,7 @@ function Home() {
               {!user && (
                 <button
                   onClick={() => navigate("/login")}
-                  className="bg-red-600 px-6 py-2 rounded-lg hover:bg-red-700"
+                  className="bg-red-600 px-5 py-2 rounded-lg hover:bg-red-700"
                 >
                   🔐 Login
                 </button>
@@ -122,14 +114,15 @@ function Home() {
             </div>
           </div>
 
-          {/* Banner dots */}
-          <div className="absolute bottom-6 right-10 flex gap-2">
+          {/* DOTS */}
+          <div className="absolute bottom-4 right-6 flex gap-2 z-20">
             {movies.map((_, i) => (
-              <div
+              <span
                 key={i}
                 onClick={() => setCurrentIndex(i)}
-                className={`w-3 h-3 rounded-full cursor-pointer ${currentIndex === i ? "bg-red-500" : "bg-gray-500"
-                  }`}
+                className={`w-3 h-3 rounded-full cursor-pointer ${
+                  i === currentIndex ? "bg-red-500" : "bg-gray-500"
+                }`}
               />
             ))}
           </div>
@@ -137,45 +130,43 @@ function Home() {
       )}
 
       {/* 🎥 MOVIE ROW */}
-      <section className="mt-12 px-6 relative">
-        <h2 className="text-2xl font-semibold mb-4">Popular Movies</h2>
+      <section className="mt-10 px-4 md:px-6 relative">
+        <h2 className="text-xl md:text-2xl font-semibold mb-4">
+          Popular Movies
+        </h2>
 
-        {/* LEFT */}
         <button
           onClick={() => scroll("left")}
-          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-20
-                      bg-black/70 hover:bg-black p-2 rounded-full"
+          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/70 p-2 rounded-full"
         >
           <ChevronLeft size={30} />
         </button>
 
         <div
           ref={rowRef}
-          className="flex gap-6 overflow-x-scroll scroll-smooth no-scrollbar px-10"
+          className="flex gap-4 overflow-x-scroll no-scrollbar scroll-smooth px-2 md:px-10"
         >
           {filteredMovies.map((movie) => (
             <div
               key={movie._id}
               onClick={() => navigate(`/movies/${movie._id}`)}
-              className="min-w-[200px] cursor-pointer transform hover:scale-110 transition"
+              className="min-w-[140px] sm:min-w-[180px] md:min-w-[200px] cursor-pointer hover:scale-105 transition"
             >
               <img
                 src={`${imageBase}/${movie.posterUrl}`}
+                className="rounded-lg"
                 alt={movie.title}
-                className="rounded-lg shadow-lg"
               />
-              <p className="text-center mt-2 text-gray-300 text-sm">
+              <p className="text-center mt-1 text-xs md:text-sm text-gray-300">
                 {movie.title}
               </p>
             </div>
           ))}
         </div>
 
-        {/* RIGHT */}
         <button
           onClick={() => scroll("right")}
-          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-20
-                      bg-black/70 hover:bg-black p-2 rounded-full"
+          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/70 p-2 rounded-full"
         >
           <ChevronRight size={30} />
         </button>

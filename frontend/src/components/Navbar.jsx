@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { User } from "lucide-react";
 import logo from "../assets/1.png";
 
-function Navbar({ search = "", setSearch }) {
+function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -14,59 +14,51 @@ function Navbar({ search = "", setSearch }) {
   };
 
   return (
-    <nav className="bg-gray-900 text-white px-6 py-4 shadow-lg flex items-center justify-between gap-6 sticky top-0 z-50">
+    <nav className="bg-gray-900 text-white px-4 md:px-6 py-3 shadow-lg flex items-center justify-between sticky top-0 z-50">
       
-      {/* LEFT: Logo + Admin */}
-      <div className="flex items-center gap-6">
+      {/* LEFT */}
+      <div className="flex items-center gap-4">
         <Link to="/">
-          <img src={logo} alt="CineRate Logo" className="w-40 h-auto" />
+          <img
+            src={logo}
+            alt="CineRate Logo"
+            className="w-28 md:w-36 h-auto"
+          />
         </Link>
 
         {user?.role === "admin" && (
           <Link
             to="/admin/movies"
-            className="hover:text-red-400 transition font-medium"
+            className="hidden sm:block hover:text-red-400 transition text-sm md:text-base"
           >
             Manage Movies
           </Link>
         )}
       </div>
 
-      {/* CENTER: Search Bar */}
-      {setSearch && (
-        <input
-          type="text"
-          placeholder="Search movies..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="bg-gray-800 text-white px-4 py-2 rounded-lg w-72
-                     focus:outline-none focus:ring-2 focus:ring-red-600"
-        />
-      )}
-
-      {/* RIGHT: Auth */}
-      <div className="flex items-center space-x-6">
+      {/* RIGHT */}
+      <div className="flex items-center gap-3 md:gap-6 text-sm md:text-base">
         {user ? (
           <>
-            <div className="flex items-center space-x-2 text-gray-300">
-              <User className="w-5 h-5 text-indigo-400" />
+            <div className="hidden sm:flex items-center gap-2 text-gray-300">
+              <User className="w-4 h-4 text-indigo-400" />
               <span>{user.name}</span>
             </div>
             <button
               onClick={handleLogout}
-              className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 transition"
+              className="bg-red-600 px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-red-700"
             >
               Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="hover:text-indigo-400 transition">
+            <Link to="/login" className="hover:text-indigo-400">
               Login
             </Link>
             <Link
               to="/register"
-              className="bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+              className="bg-indigo-600 px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-indigo-700"
             >
               Register
             </Link>
