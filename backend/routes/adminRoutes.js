@@ -3,23 +3,27 @@ import upload from "../middleware/uploadMiddleware.js";
 import { verifyToken, verifyAdmin } from "../middleware/authMiddleware.js";
 import {
   addMovie,
-  getAllMovies,
-  getMovieById,
   updateMovie,
   deleteMovie,
-  searchMovies,
 } from "../controllers/movieController.js";
+import {
+  getDashboardStats,
+  getAdminMovies,
+  getAdminReviews,
+  getAdminUsers,
+} from "../controllers/adminController.js";
 
 const router = express.Router();
 
-router.get("/", getAllMovies);
-router.get("/search", searchMovies);
-router.get("/:id", getMovieById);
+router.use(verifyToken, verifyAdmin);
+
+router.get("/stats", getDashboardStats);
+router.get("/movies", getAdminMovies);
+router.get("/reviews", getAdminReviews);
+router.get("/users", getAdminUsers);
 
 router.post(
-  "/",
-  verifyToken,
-  verifyAdmin,
+  "/movies",
   upload.fields([
     { name: "poster", maxCount: 1 },
     { name: "banner", maxCount: 1 },
@@ -29,9 +33,7 @@ router.post(
 );
 
 router.put(
-  "/:id",
-  verifyToken,
-  verifyAdmin,
+  "/movies/:id",
   upload.fields([
     { name: "poster", maxCount: 1 },
     { name: "banner", maxCount: 1 },
@@ -40,6 +42,6 @@ router.put(
   updateMovie
 );
 
-router.delete("/:id", verifyToken, verifyAdmin, deleteMovie);
+router.delete("/movies/:id", deleteMovie);
 
 export default router;

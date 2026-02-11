@@ -1,38 +1,30 @@
 import Watchlist from "../models/Watchlist.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import AppError from "../utils/appError.js";
 
-// Add movie to watchlist
-export const addToWatchlist = async (req, res) => {
-  try {
-    const { userId, movieId } = req.body;
+export const addToWatchlist = asyncHandler(async (req, res) => {
+  const { movieId } = req.body;
+  if (!movieId) throw new AppError("movieId is required", 400);
 
-    const item = await Watchlist.create({ userId: userId, movieId: movieId });
+  const existing = await Watchlist.findOne({ userId: req.user.id, movieId });
+  if (existing) throw new AppError("Movie already in watchlist", 409);
 
-    res.status(201).json({ message: "Movie added to watchlist", item });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  const item = await Watchlist.create({ userId: req.user.id, movieId });
+  res.status(201).json({ success: true, message: "Movie added to watchlist", item });
+});
 
-// Get watchlist for a user
-export const getWatchlist = async (req, res) => {
-  try {
-    const items = await Watchlist.find()
-      .populate("user", "name email")
-      .populate("movie", "title");
+export const getWatchlist = asyncHandler(async (req, res) => {
+  const items = await Watchlist.find({ userId: req.user.id })
+    .populate("movieId", "title posterUrl genre rating")
+    .sort({ createdAt: -1 })
+    .lean();
 
-    res.json(items);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  res.status(200).json({ success: true, data: items });
+});
 
-// Remove movie from watchlist
-export const removeFromWatchlist = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Watchlist.findByIdAndDelete(id);
-    res.json({ message: "Movie removed from watchlist" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+export const removeFromWatchlist = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const item = await Watchlist.findOneAndDelete({ _id: id, userId: req.user.id });
+  if (!item) throw new AppError("Watchlist item not found", 404);
+  res.status(200).json({ success: true, message: "Movie removed from watchlist" });
+});

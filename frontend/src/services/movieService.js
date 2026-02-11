@@ -1,76 +1,45 @@
-import axios from "axios";
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import api from "./api";
 
-//  Get all movies
 export const getAllMovies = async () => {
-  try {
-    const res = await axios.get(`${API}/api/movies`);
-    return res.data;
-  } catch (error) {
-    console.error("Error fetching movies:", error);
-    throw error;
-  }
+  const res = await api.get("/movies");
+  return res.data.data || [];
 };
 
-// Add a new movie (Admin only)
-export const addMovie = async (formData, token) => {
-  try {
-    const res = await axios.post(
-      `${API}/api/movies`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return res.data;
-  } catch (err) {
-    console.error("Add movie error:", err);
-    throw err;
-  }
+export const searchMovies = async (query) => {
+  const res = await api.get(`/movies/search?q=${encodeURIComponent(query)}`);
+  return res.data.data || [];
 };
 
-
-// Get single movie by ID
 export const getMovieById = async (id) => {
-  if (!id) throw new Error("Movie ID is required");
+  const res = await api.get(`/movies/${id}`);
+  return res.data.data;
+};
 
-  try {
-    const res = await axios.get(`${API}/api/movies/${id}`);
-    return res.data;
-  } catch (error) {
-    console.error("Error fetching movie:", error);
-    throw error;
-  }
+export const addMovie = async (formData, token) => {
+  const res = await api.post("/admin/movies", formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
 };
-// Delete movie (Admin only)
-export const deleteMovie = async (id, token) => {
-  try {
-    const res = await axios.delete(`${API}/api/movies/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Error deleting movie:", error);
-    throw error;
-  }
-};
-// Update movie (Admins only)
+
 export const updateMovie = async (id, formData, token) => {
-  try {
-    const res = await axios.put(`${API}/api/movies/${id}`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Error updating movie:", error);
-    throw error;
-  }
+  const res = await api.put(`/admin/movies/${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+};
+
+export const deleteMovie = async (id, token) => {
+  const res = await api.delete(`/admin/movies/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
 };

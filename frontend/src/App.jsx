@@ -1,8 +1,13 @@
-
 import AppRoutes from "./routes/AppRouter";
+import GlobalLoader from "./components/GlobalLoader";
 
 function App(){
-  return <AppRoutes />
+  return (
+    <>
+      <GlobalLoader />
+      <AppRoutes />
+    </>
+  );
 }
 
 

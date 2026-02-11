@@ -6,51 +6,53 @@ const movieSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      index: true,
     },
     description: {
       type: String,
       required: true,
+      trim: true,
     },
     genre: {
-      type: [String], // Supports multiple genres like ["Sci-Fi", "Adventure"]
+      type: [String],
       required: true,
+      default: [],
+      index: true,
     },
     releaseDate: {
       type: Date,
       required: true,
     },
-
-    // 🔥 Main poster (vertical image)
+    releaseYear: {
+      type: Number,
+    },
     posterUrl: {
       type: String,
       default: null,
     },
-
-    // 🔥 Banner (Netflix-style widescreen header)
     bannerUrl: {
       type: String,
       default: null,
     },
-
-    // 🎞 Extra images if needed
     gallery: {
       type: [String],
       default: [],
     },
-
     rating: {
       type: Number,
       default: 0,
       min: 0,
       max: 5,
     },
-    bannerUrl: {
-      type: String,
-      required: false
-    }
-
   },
   { timestamps: true }
 );
+
+movieSchema.pre("save", function setReleaseYear(next) {
+  if (!this.releaseYear && this.releaseDate) {
+    this.releaseYear = new Date(this.releaseDate).getFullYear();
+  }
+  next();
+});
 
 export default mongoose.model("Movie", movieSchema);

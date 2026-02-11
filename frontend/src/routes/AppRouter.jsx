@@ -12,24 +12,29 @@ import ResetPassword from "../pages/ResetPassword";
 import Success from "../pages/Success";
 import NotFound from "../pages/NotFound";
 import ManageMovies from "../pages/Admin/ManageMovies";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
+import ManageReviews from "../pages/Admin/ManageReviews";
 
 const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-
-        {/* ---- PUBLIC ROUTES ---- */}
         <Route path="/" element={<Home />} />
         <Route path="/movies/:id" element={<MovieDetails />} />
-
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/success" element={<Success />} />
 
-
-        {/* ---- PROTECTED / ADMIN ROUTES ---- */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/admin/movies"
           element={
@@ -38,7 +43,6 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/admin/add-movie"
           element={
@@ -47,7 +51,6 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/admin/edit-movie/:id"
           element={
@@ -56,9 +59,16 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/users"
+          path="/admin/reviews"
+          element={
+            <ProtectedRoute role="admin">
+              <ManageReviews />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
           element={
             <ProtectedRoute role="admin">
               <UserList />
@@ -66,9 +76,7 @@ const AppRoutes = () => {
           }
         />
 
-        {/* Catch all */}
         <Route path="*" element={<NotFound />} />
-
       </Routes>
     </Router>
   );

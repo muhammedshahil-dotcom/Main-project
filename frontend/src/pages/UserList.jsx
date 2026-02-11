@@ -1,19 +1,21 @@
 import { useEffect, useState, useContext } from "react";
 import { getAllUsers, deleteUser } from "../services/UserService";
 import { AuthContext } from "../context/AuthContext";
+import AdminLayout from "../components/AdminLayout";
 
 function UserList() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user, token } = useContext(AuthContext);
+  const [error, setError] = useState("");
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const data = await getAllUsers(token);
         setUsers(data);
-      } catch (error) {
-        console.error("❌ Failed to fetch users:", error);
+      } catch (err) {
+        setError(err?.response?.data?.message || "Failed to fetch users");
       } finally {
         setLoading(false);
       }
@@ -23,70 +25,58 @@ function UserList() {
   }, [token]);
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       await deleteUser(id, token);
-      setUsers(users.filter((u) => u._id !== id));
-    } catch (error) {
-      console.error("❌ Failed to delete user:", error);
+      setUsers((prev) => prev.filter((user) => user._id !== id));
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to delete user");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-950 text-gray-400">
-        Loading users...
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-6 py-10">
-      <h1 className="text-3xl font-bold mb-6 text-center">👥 User List</h1>
+    <AdminLayout title="Manage Users">
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-700 bg-red-950/40 p-3 text-sm text-red-300">
+          {error}
+        </div>
+      )}
 
-      <div className="overflow-x-auto bg-gray-900 rounded-xl shadow-lg border border-gray-800">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-800 text-gray-300 uppercase text-xs">
-            <tr>
-              <th className="px-6 py-3 text-left">Name</th>
-              <th className="px-6 py-3 text-left">Email</th>
-              <th className="px-6 py-3 text-left">Role</th>
-              {user?.role === "admin" && (
-                <th className="px-6 py-3 text-center">Actions</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr
-                key={u._id}
-                className="border-t border-gray-800 hover:bg-gray-800 transition"
-              >
-                <td className="px-6 py-3">{u.name}</td>
-                <td className="px-6 py-3 text-gray-400">{u.email}</td>
-                <td
-                  className={`px-6 py-3 ${
-                    u.role === "admin" ? "text-green-400" : "text-blue-400"
-                  }`}
-                >
-                  {u.role}
-                </td>
-                {user?.role === "admin" && (
-                  <td className="px-6 py-3 text-center">
+      {loading ? (
+        <p className="text-gray-400">Loading users...</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-gray-800 bg-black/40">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-800/80 text-xs uppercase text-gray-300">
+              <tr>
+                <th className="px-4 py-3 text-left">Name</th>
+                <th className="px-4 py-3 text-left">Email</th>
+                <th className="px-4 py-3 text-left">Role</th>
+                <th className="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id} className="border-t border-gray-800 hover:bg-gray-800/40">
+                  <td className="px-4 py-3">{user.name}</td>
+                  <td className="px-4 py-3 text-gray-400">{user.email}</td>
+                  <td className="px-4 py-3">{user.role}</td>
+                  <td className="px-4 py-3 text-center">
                     <button
-                      onClick={() => handleDelete(u._id)}
-                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition"
+                      onClick={() => handleDelete(user._id)}
+                      className="rounded bg-red-600 px-3 py-1 text-xs hover:bg-red-700"
                     >
                       Delete
                     </button>
                   </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {users.length === 0 && <p className="p-4 text-gray-400">No users found.</p>}
+        </div>
+      )}
+    </AdminLayout>
   );
 }
 

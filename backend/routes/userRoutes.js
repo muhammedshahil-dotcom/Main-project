@@ -1,26 +1,22 @@
 import express from "express";
-import { registerUser, loginUser, getAllUsers, deleteUser } from "../controllers/userController.js";
-import { protect } from "../middleware/authMiddleware.js";
-import { admin } from "../middleware/authMiddleware.js";
-import { forgotPassword, resetPassword } from "../controllers/userController.js";
+import { verifyToken, verifyAdmin } from "../middleware/authMiddleware.js";
+import { getAllUsers, deleteUser } from "../controllers/userController.js";
+import {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+} from "../controllers/authController.js";
 
 const router = express.Router();
 
-// Register
-router.post("/register", registerUser);
-
-// Login
-router.post("/login", loginUser);
-
-// Admin: Get all users
-router.get("/", protect, admin, getAllUsers);
-
-// Admin: Delete user
-router.delete("/:id", protect, admin, deleteUser);
-
-// Forgot Password
+// Backward-compatible auth aliases.
+router.post("/register", register);
+router.post("/login", login);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
+router.get("/", verifyToken, verifyAdmin, getAllUsers);
+router.delete("/:id", verifyToken, verifyAdmin, deleteUser);
 
 export default router;

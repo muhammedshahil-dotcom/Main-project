@@ -8,17 +8,22 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       await register({ name, email, password });
       navigate("/");
     } catch (err) {
-      setError(err.message || "Registration failed");
+      setError(err?.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,9 +91,10 @@ function Register() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 rounded-lg shadow-md"
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 

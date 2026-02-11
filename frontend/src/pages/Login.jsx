@@ -7,16 +7,21 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       await login({ email, password });
       navigate("/");
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err?.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,9 +89,10 @@ function Login() {
           </div>
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2 sm:py-3 rounded-lg shadow-md text-sm sm:text-base"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 

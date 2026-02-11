@@ -1,13 +1,17 @@
 import express from "express";
-import { addReview, getReviewsByMovie } from "../controllers/reviewController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import {
+  addReview,
+  getReviewsByMovie,
+  updateReview,
+  deleteReview,
+} from "../controllers/reviewController.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Add revieie
-router.post("/:movieId", protect, addReview);
-
-// Get reviews for movie
+router.post("/:movieId", verifyToken, addReview);
 router.get("/movie/:movieId", getReviewsByMovie);
+router.put("/:id", verifyToken, updateReview);
+router.delete("/:id", verifyToken, deleteReview);
 
 export default router;

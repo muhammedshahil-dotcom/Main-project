@@ -1,66 +1,52 @@
-import { createContext, useState, useEffect } from "react";
-import { loginUser, registerUser } from "../services/authService"; // Import authService
+import { createContext, useMemo, useState, useEffect } from "react";
+import { loginUser, registerUser } from "../services/authService";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
-    const [loading, setLoading] = useState(true); // Add loading state
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-    useEffect(() => {
-        const savedToken = localStorage.getItem("token");
-        const savedUser = localStorage.getItem("user");
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
 
-        if (savedToken && savedUser && savedUser !== "undefined") {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-        }
-        setLoading(false);
-    }, []);
-
-
-
-    const login = async (credentials) => {
-        try {
-            const data = await loginUser(credentials); // Call loginUser from authService
-            setUser(data.user);
-            setToken(data.token);
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify(data.user));
-        } catch (error) {
-            console.error("Login error:", error);
-            throw error; // Re-throw the error to be caught in the component
-        }
-    };
-
-    const register = async (userData) => {
-        try {
-            const data = await registerUser(userData); // Call registerUser from authService
-            setUser(data.user);
-            setToken(data.token);
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify(data.user));
-        } catch (error) {
-            console.error("Registration error:", error);
-            throw error; // Re-throw the error to be caught in the component
-        }
-    };
-
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-    };
-
-    if (loading) {
-        return <div>Loading...</div>; // Or a spinner
+    if (savedToken && savedUser && savedUser !== "undefined") {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
     }
 
-    return (
-        <AuthContext.Provider value={{ user, token, login, register, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    setAuthLoading(false);
+  }, []);
+
+  const login = async (credentials) => {
+    const data = await loginUser(credentials);
+    setUser(data.user);
+    setToken(data.token);
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  };
+
+  const register = async (payload) => {
+    const data = await registerUser(payload);
+    setUser(data.user);
+    setToken(data.token);
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  };
+
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  };
+
+  const value = useMemo(
+    () => ({ user, token, authLoading, login, register, logout }),
+    [user, token, authLoading]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

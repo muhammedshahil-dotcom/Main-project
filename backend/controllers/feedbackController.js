@@ -1,33 +1,34 @@
 import Feedback from "../models/Feedback.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import AppError from "../utils/appError.js";
 
-// Add new feedback
-export const addFeedback = async (req, res) => {
-  try {
-    const { message, rating, movieId } = req.body;
+export const addFeedback = asyncHandler(async (req, res) => {
+  const { message, rating, movieId } = req.body;
 
-    // user comes from token (protect middleware)
-    const feedback = await Feedback.create({
-      message,
-      rating,
-      user: req.user.id,
-      movie: movieId,
-    });
-
-    res.status(201).json({ message: "Feedback added successfully", feedback });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (!message || !movieId) {
+    throw new AppError("message and movieId are required", 400);
   }
-};
 
-// Get all feedbacks
-export const getFeedbacks = async (req, res) => {
-  try {
-    const feedbacks = await Feedback.find()
-      .populate("user", "name email") // populate user info
-      .populate("movie", "title"); // populate movie title
+  const feedback = await Feedback.create({
+    message,
+    rating,
+    user: req.user.id,
+    movie: movieId,
+  });
 
-    res.json(feedbacks);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  res.status(201).json({
+    success: true,
+    message: "Feedback added successfully",
+    feedback,
+  });
+});
+
+export const getFeedbacks = asyncHandler(async (req, res) => {
+  const feedbacks = await Feedback.find()
+    .populate("user", "name email")
+    .populate("movie", "title")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.status(200).json({ success: true, data: feedbacks });
+});

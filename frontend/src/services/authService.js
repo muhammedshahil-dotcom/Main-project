@@ -1,19 +1,21 @@
-import axios from "axios";
+import api from "./api";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+export const loginUser = async (credentials) => {
+  const res = await api.post("/auth/login", credentials);
+  return res.data;
+};
 
-// Login
-export const loginUser = (credentials) =>
-  axios.post(`${BASE_URL}/api/auth/login`, credentials).then(res => res.data);
+export const registerUser = async (payload) => {
+  const res = await api.post("/auth/register", payload);
+  return res.data;
+};
 
-// Register
-export const registerUser = (data) =>
-  axios.post(`${BASE_URL}/api/auth/register`, data).then(res => res.data);
+export const forgotPassword = async (email) => {
+  const res = await api.post("/auth/forgot-password", { email });
+  return res.data;
+};
 
-// Forgot Password
-export const forgotPassword = (email) =>
-  axios.post(`${BASE_URL}/api/users/forgot-password`, { email }).then(res => res.data);
-
-// Reset Password
-export const resetPassword = (token, password) =>
-  axios.post(`${BASE_URL}/api/users/reset-password/${token}`, { password }).then(res => res.data);
+export const resetPassword = async (token, password) => {
+  const res = await api.post(`/auth/reset-password/${token}`, { password });
+  return res.data;
+};

@@ -1,199 +1,223 @@
-import { useEffect, useState, useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getMovieById } from "../services/movieService";
-import { getReviewsByMovie, addReview } from "../services/reviewService";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { AuthContext } from "../context/AuthContext";
-
+import { getMovieById } from "../services/movieService";
+import {
+  addReview,
+  deleteReview,
+  getReviewsByMovie,
+  updateReview,
+} from "../services/reviewService";
 
 function MovieDetails() {
   const { id } = useParams();
   const { user, token } = useContext(AuthContext);
-
   const [movie, setMovie] = useState(null);
   const [reviews, setReviews] = useState([]);
-
-
-  const [editingReview, setEditingReview] = useState(null);
-
-  const handleDelete = async (reviewId) => {
-    if (!confirm("Delete this review?")) return;
-
-    try {
-      await deleteReview(reviewId, token);
-      setReviews(await getReviewsByMovie(id));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleUpdate = async (reviewId) => {
-  try {
-    await updateReview(reviewId, { rating, comment }, token);
-    setEditingReview(null);
-    setReviews(await getReviewsByMovie(id));
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-
-
-  // ⭐ NEW STATE
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const imageBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  const refreshReviews = async () => {
+    const reviewData = await getReviewsByMovie(id);
+    setReviews(reviewData);
+  };
 
   useEffect(() => {
-    const fetchMovieAndReviews = async () => {
+    const fetchMovieData = async () => {
+      setLoading(true);
+      setError("");
       try {
-        const movieData = await getMovieById(id);
-        const reviewData = await getReviewsByMovie(id);
-
+        const [movieData, reviewData] = await Promise.all([
+          getMovieById(id),
+          getReviewsByMovie(id),
+        ]);
         setMovie(movieData);
         setReviews(reviewData);
       } catch (err) {
-        console.error("❌ Failed to fetch movie or reviews:", err);
+        setError(err?.response?.data?.message || "Failed to load movie details");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMovieAndReviews();
+    fetchMovieData();
   }, [id]);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!token) return alert("You must be logged in to post a review.");
-
+    if (!token) return;
     try {
-      await addReview(id, { rating, comment }, token);
-      const updatedReviews = await getReviewsByMovie(id);
-      setReviews(updatedReviews);
-
-      // reset after submit
+      if (editingId) {
+        await updateReview(editingId, { rating, comment }, token);
+      } else {
+        await addReview(id, { rating, comment }, token);
+      }
       setRating(0);
       setComment("");
+      setEditingId(null);
+      await refreshReviews();
     } catch (err) {
-      console.error("❌ Failed to add review:", err);
-      alert("Error adding review.");
+      setError(err?.response?.data?.message || "Failed to save review");
     }
   };
 
-  if (loading)
+  const onEdit = (review) => {
+    setEditingId(review._id);
+    setRating(review.rating);
+    setComment(review.comment);
+  };
+
+  const onDelete = async (reviewId) => {
+    if (!window.confirm("Delete this review?")) return;
+    try {
+      await deleteReview(reviewId, token);
+      if (editingId === reviewId) {
+        setEditingId(null);
+        setRating(0);
+        setComment("");
+      }
+      await refreshReviews();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to delete review");
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen bg-gray-950 text-white" />;
+  }
+
+  if (!movie) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-white">
-        Loading movie...
+      <div className="min-h-screen bg-gray-950 text-white">
+        <Navbar />
+        <div className="mx-auto max-w-5xl px-4 py-12 text-red-400">{error || "Movie not found"}</div>
       </div>
     );
+  }
 
-  if (!movie)
-    return (
-      <div className="flex items-center justify-center min-h-screen text-red-400">
-        Movie not found.
-      </div>
-    );
-
-  const imageBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const averageRating =
+    reviews.length > 0
+      ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+      : "0.0";
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <Navbar />
-
-      <main className="container mx-auto px-6 py-10">
-        <div className="grid md:grid-cols-2 gap-10">
-          <img
-            src={`${imageBase}/${movie.posterUrl}`}
-            alt={movie.title}
-            className="rounded-lg shadow-lg w-full max-h-[500px] object-cover"
-          />
-
-          {/* ⭐ Average Rating */}
-          <div className="flex items-center mt-2">
-            <p className="text-yellow-400 text-2xl mr-2">
-              {reviews.length > 0
-                ? "⭐".repeat(Math.round(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length))
-                : "⭐"}
-            </p>
-            <span className="text-gray-400">
-              ({reviews.length > 0
-                ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
-                : "0.0"} / 5)
-            </span>
+      <main className="mx-auto max-w-6xl px-4 py-8 md:px-6">
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-700 bg-red-950/40 p-3 text-sm text-red-300">
+            {error}
           </div>
+        )}
 
-
+        <div className="grid gap-6 md:grid-cols-2">
+          <img
+            src={`${imageBase}/${(movie.posterUrl || "").replace(/\\\\/g, "/")}`}
+            alt={movie.title}
+            className="h-[440px] w-full rounded-lg object-cover"
+          />
           <div>
-            <h1 className="text-4xl font-bold">{movie.title}</h1>
-            <p className="mt-3 text-gray-400">{movie.description}</p>
-
-            <p className="mt-4"><strong>Genre:</strong> {movie.genre}</p>
-            <p><strong>Release:</strong> {movie.releaseDate?.slice(0, 10)}</p>
+            <h1 className="text-3xl font-bold md:text-4xl">{movie.title}</h1>
+            <p className="mt-3 text-gray-300">{movie.description}</p>
+            <p className="mt-4 text-sm text-gray-300">
+              Genre: {Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre}
+            </p>
+            <p className="mt-1 text-sm text-gray-300">Release: {movie.releaseDate?.slice(0, 10)}</p>
+            <p className="mt-4 text-yellow-400">Average Rating: {averageRating} / 5</p>
           </div>
         </div>
 
-        {/* ⭐ Review Form */}
-        <section className="mt-10">
-          <h2 className="text-2xl font-semibold">Rate & Review</h2>
-
+        <section className="mt-10 rounded-xl bg-gray-900 p-5">
+          <h2 className="text-xl font-semibold">Rate and Review</h2>
           {user ? (
-            <form onSubmit={handleReviewSubmit} className="mt-4 bg-gray-900 p-6 rounded-lg">
-              {/* ⭐ Star selector */}
-              <div className="flex text-3xl space-x-2 cursor-pointer mb-4">
-                {[1, 2, 3, 4, 5].map(star => (
-                  <span
+            <form onSubmit={handleReviewSubmit} className="mt-4 space-y-4">
+              <div className="flex gap-2 text-2xl">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
                     key={star}
                     onClick={() => setRating(star)}
                     className={rating >= star ? "text-yellow-400" : "text-gray-600"}
                   >
-                    ⭐
-                  </span>
+                    *
+                  </button>
                 ))}
               </div>
-
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3"
                 placeholder="Write your review..."
-                className="w-full bg-gray-800 p-3 rounded text-white"
-                rows="3"
+                rows={4}
                 required
-              ></textarea>
-
-              <button
-                type="submit"
-                className="mt-4 bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-semibold"
-              >
-                Submit Review
-              </button>
+              />
+              <div className="flex flex-wrap gap-2">
+                <button className="rounded-lg bg-red-600 px-4 py-2 hover:bg-red-700">
+                  {editingId ? "Update Review" : "Submit Review"}
+                </button>
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingId(null);
+                      setRating(0);
+                      setComment("");
+                    }}
+                    className="rounded-lg border border-gray-600 px-4 py-2"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
             </form>
           ) : (
             <p className="mt-2 text-gray-400">Login to post a review.</p>
           )}
         </section>
 
-        {/* 🧾 Display Reviews */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">User Reviews</h2>
-
-          {reviews.length === 0 ? (
-            <p className="text-gray-400">No reviews yet.</p>
-          ) : (
-            reviews.map((r) => (
-              <div key={r._id} className="bg-gray-900 p-4 rounded-lg mb-4">
-                <p className="text-yellow-400">{"⭐".repeat(r.rating)}</p>
-                <p className="mt-2">{r.comment}</p>
-                <span className="text-gray-500 text-sm">
-                  — {r.user?.name || "Unknown"}
-                </span>
-              </div>
-            ))
-          )}
+          <h2 className="mb-4 text-xl font-semibold">User Reviews</h2>
+          <div className="space-y-3">
+            {reviews.length === 0 ? (
+              <p className="text-gray-400">No reviews yet.</p>
+            ) : (
+              reviews.map((review) => {
+                const isOwner = user && review.user?._id === user.id;
+                const isAdmin = user?.role === "admin";
+                return (
+                  <div key={review._id} className="rounded-lg bg-gray-900 p-4">
+                    <p className="text-yellow-400">{"*".repeat(review.rating)}</p>
+                    <p className="mt-2">{review.comment}</p>
+                    <p className="mt-1 text-xs text-gray-500">- {review.user?.name || "Unknown"}</p>
+                    {(isOwner || isAdmin) && (
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => onEdit(review)}
+                          className="rounded bg-yellow-600 px-3 py-1 text-sm hover:bg-yellow-700"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => onDelete(review._id)}
+                          className="rounded bg-red-600 px-3 py-1 text-sm hover:bg-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </section>
       </main>
-
       <Footer />
     </div>
   );
