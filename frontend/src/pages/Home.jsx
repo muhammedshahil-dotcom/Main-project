@@ -23,9 +23,10 @@ function Home() {
       setError("");
       try {
         const data = searchQuery ? await searchMovies(searchQuery) : await getAllMovies();
-        setMovies(data);
+        setMovies(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err?.response?.data?.message || "Failed to load movies");
+        setMovies([]);
       } finally {
         setLoading(false);
       }

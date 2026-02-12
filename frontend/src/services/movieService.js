@@ -1,20 +1,22 @@
 import api from "./api";
 
+const asArray = (value) => (Array.isArray(value) ? value : []);
+
 export const getAllMovies = async () => {
   const res = await api.get("/movies", { skipGlobalLoader: true });
-  return res.data.data || [];
+  return asArray(res.data?.data ?? res.data);
 };
 
 export const searchMovies = async (query) => {
   const res = await api.get(`/movies/search?q=${encodeURIComponent(query)}`, {
     skipGlobalLoader: true,
   });
-  return res.data.data || [];
+  return asArray(res.data?.data ?? res.data);
 };
 
 export const getMovieById = async (id) => {
   const res = await api.get(`/movies/${id}`, { skipGlobalLoader: true });
-  return res.data.data;
+  return res.data?.data ?? res.data;
 };
 
 export const addMovie = async (formData, token) => {
