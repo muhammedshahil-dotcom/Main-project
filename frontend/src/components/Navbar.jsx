@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { Menu, Search, User, X } from "lucide-react";
 import { AuthContext } from "../context/AuthContextBase";
-import logo from "../assets/logo.png";
 
 function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -50,7 +49,14 @@ function Navbar() {
           </button>
 
           <Link to="/" className="shrink-0">
-            <img src={logo} alt="CineRate Logo" className="h-9 w-auto md:h-11" />
+            <div className="rounded-md border border-gray-800 bg-[#050b1d] px-3 py-1">
+              <span className="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
+                CINE
+              </span>
+              <span className="text-2xl font-extrabold tracking-tight text-red-500 md:text-3xl">
+                RATE
+              </span>
+            </div>
           </Link>
         </div>
 
@@ -66,6 +72,11 @@ function Navbar() {
         </div>
 
         <div className="hidden items-center gap-4 md:flex">
+          {user && (
+            <Link to="/my-bookings" className="text-sm text-gray-300 hover:text-red-400">
+              My Bookings
+            </Link>
+          )}
           {user?.role === "admin" && (
             <Link to="/admin" className="text-sm text-gray-300 hover:text-red-400">
               Admin
@@ -120,6 +131,15 @@ function Navbar() {
               className="block rounded-md px-2 py-1 text-sm hover:bg-gray-800"
             >
               Admin Dashboard
+            </Link>
+          )}
+          {user && (
+            <Link
+              to="/my-bookings"
+              onClick={() => setMenuOpen(false)}
+              className="block rounded-md px-2 py-1 text-sm hover:bg-gray-800"
+            >
+              My Bookings
             </Link>
           )}
           {user ? (

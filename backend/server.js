@@ -11,6 +11,7 @@ import feedbackRoutes from "./routes/feedbackRoutes.js";
 import watchlistRoutes from "./routes/watchlistRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -46,6 +47,7 @@ app.use("/api/feedbacks", feedbackRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

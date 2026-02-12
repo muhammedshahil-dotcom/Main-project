@@ -73,7 +73,13 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
   const resetLink = `${baseUrl}/reset-password/${rawToken}`;
 
-  await sendEmail({
+  // Respond fast to reduce UI wait time; email is sent asynchronously.
+  res.status(200).json({
+    success: true,
+    message: "If that email exists, a reset link has been sent.",
+  });
+
+  sendEmail({
     to: user.email,
     subject: "Password Reset Request",
     html: `
@@ -83,12 +89,11 @@ export const forgotPassword = asyncHandler(async (req, res) => {
       <p>This link expires in 15 minutes.</p>
       <p>If you did not request this, please ignore this email.</p>
     `,
+  }).catch((error) => {
+    console.error("Forgot password email send failed:", error.message);
   });
 
-  return res.status(200).json({
-    success: true,
-    message: "If that email exists, a reset link has been sent.",
-  });
+  return;
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {

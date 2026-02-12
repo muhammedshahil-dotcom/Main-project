@@ -3,6 +3,7 @@ import api from "./api";
 export const getAllUsers = async (token) => {
   const res = await api.get("/admin/users", {
     headers: { Authorization: `Bearer ${token}` },
+    skipGlobalLoader: true,
   });
   return res.data.data || [];
 };

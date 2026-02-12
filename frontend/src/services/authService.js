@@ -11,11 +11,15 @@ export const registerUser = async (payload) => {
 };
 
 export const forgotPassword = async (email) => {
-  const res = await api.post("/auth/forgot-password", { email });
+  const res = await api.post("/auth/forgot-password", { email }, { skipGlobalLoader: true });
   return res.data;
 };
 
 export const resetPassword = async (token, password) => {
-  const res = await api.post(`/auth/reset-password/${token}`, { password });
+  const res = await api.post(
+    `/auth/reset-password/${token}`,
+    { password },
+    { skipGlobalLoader: true }
+  );
   return res.data;
 };

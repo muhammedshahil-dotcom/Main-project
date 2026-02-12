@@ -10,6 +10,7 @@ import {
   getReviewsByMovie,
   updateReview,
 } from "../services/reviewService";
+import { createBooking } from "../services/bookingService";
 
 function MovieDetails() {
   const { id } = useParams();
@@ -21,6 +22,11 @@ function MovieDetails() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showDate, setShowDate] = useState("");
+  const [showTime, setShowTime] = useState("18:00");
+  const [seats, setSeats] = useState(1);
+  const [bookingMessage, setBookingMessage] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
   const imageBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const refreshReviews = async () => {
@@ -88,6 +94,36 @@ function MovieDetails() {
     }
   };
 
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    if (!token) {
+      setError("Please login to book tickets");
+      return;
+    }
+
+    setBookingLoading(true);
+    setBookingMessage("");
+    setError("");
+
+    try {
+      const res = await createBooking(
+        {
+          movieId: id,
+          showDate,
+          showTime,
+          seats,
+        },
+        token
+      );
+      setBookingMessage(res.message || "Ticket booked successfully");
+      setSeats(1);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to book tickets");
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-gray-950 text-white" />;
   }
@@ -134,6 +170,51 @@ function MovieDetails() {
         </div>
 
         <section className="mt-10 rounded-xl bg-gray-900 p-5">
+          <h2 className="text-xl font-semibold">Book Tickets</h2>
+          {user ? (
+            <form onSubmit={handleBooking} className="mt-4 grid gap-3 md:grid-cols-4">
+              <input
+                type="date"
+                value={showDate}
+                onChange={(e) => setShowDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                className="rounded-lg border border-gray-700 bg-gray-800 p-3"
+                required
+              />
+              <select
+                value={showTime}
+                onChange={(e) => setShowTime(e.target.value)}
+                className="rounded-lg border border-gray-700 bg-gray-800 p-3"
+              >
+                <option value="10:00">10:00 AM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="21:00">9:00 PM</option>
+              </select>
+              <input
+                type="number"
+                min="1"
+                max="20"
+                value={seats}
+                onChange={(e) => setSeats(Number(e.target.value))}
+                className="rounded-lg border border-gray-700 bg-gray-800 p-3"
+                required
+              />
+              <button
+                type="submit"
+                disabled={bookingLoading}
+                className="rounded-lg bg-red-600 px-4 py-2 hover:bg-red-700 disabled:bg-gray-700"
+              >
+                {bookingLoading ? "Booking..." : `Book (Rs. ${seats * 250})`}
+              </button>
+            </form>
+          ) : (
+            <p className="mt-2 text-gray-400">Login to book tickets.</p>
+          )}
+          {bookingMessage && <p className="mt-3 text-sm text-green-400">{bookingMessage}</p>}
+        </section>
+
+        <section className="mt-6 rounded-xl bg-gray-900 p-5">
           <h2 className="text-xl font-semibold">Rate and Review</h2>
           {user ? (
             <form onSubmit={handleReviewSubmit} className="mt-4 space-y-4">

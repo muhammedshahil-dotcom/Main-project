@@ -14,6 +14,7 @@ import NotFound from "../pages/NotFound";
 import ManageMovies from "../pages/Admin/ManageMovies";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import ManageReviews from "../pages/Admin/ManageReviews";
+import MyBookings from "../pages/MyBookings";
 
 const AppRoutes = () => {
   return (
@@ -72,6 +73,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute role="admin">
               <UserList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-bookings"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
             </ProtectedRoute>
           }
         />
