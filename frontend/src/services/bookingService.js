@@ -7,6 +7,20 @@ export const createBooking = async (payload, token) => {
   return res.data;
 };
 
+export const createStripeCheckoutSession = async (payload, token) => {
+  const res = await api.post("/bookings/create-checkout-session", payload, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+export const confirmStripePayment = async (payload, token) => {
+  const res = await api.post("/bookings/confirm-payment", payload, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
 export const getMyBookings = async (token) => {
   const res = await api.get("/bookings/my", {
     headers: { Authorization: `Bearer ${token}` },

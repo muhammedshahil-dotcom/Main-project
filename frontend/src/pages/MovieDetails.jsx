@@ -10,7 +10,7 @@ import {
   getReviewsByMovie,
   updateReview,
 } from "../services/reviewService";
-import { createBooking } from "../services/bookingService";
+import { createStripeCheckoutSession } from "../services/bookingService";
 import { resolveImageUrl } from "../utils/imageUrl";
 
 function MovieDetails() {
@@ -106,7 +106,7 @@ function MovieDetails() {
     setError("");
 
     try {
-      const res = await createBooking(
+      const checkoutRes = await createStripeCheckoutSession(
         {
           movieId: id,
           showDate,
@@ -115,10 +115,13 @@ function MovieDetails() {
         },
         token
       );
-      setBookingMessage(res.message || "Ticket booked successfully");
-      setSeats(1);
+
+      const checkoutUrl = checkoutRes?.data?.checkoutUrl;
+      if (!checkoutUrl) throw new Error("Unable to start Stripe checkout");
+
+      window.location.href = checkoutUrl;
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to book tickets");
+      setError(err?.response?.data?.message || err.message || "Failed to start payment");
     } finally {
       setBookingLoading(false);
     }

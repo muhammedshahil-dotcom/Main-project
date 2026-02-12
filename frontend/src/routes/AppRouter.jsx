@@ -10,6 +10,7 @@ import MovieDetails from "../pages/MovieDetails";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import Success from "../pages/Success";
+import PaymentSuccess from "../pages/PaymentSuccess";
 import NotFound from "../pages/NotFound";
 import ManageMovies from "../pages/Admin/ManageMovies";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
@@ -27,6 +28,14 @@ const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/success" element={<Success />} />
+        <Route
+          path="/payment-success"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccess />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin"

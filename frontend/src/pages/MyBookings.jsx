@@ -80,6 +80,17 @@ const MyBookings = () => {
                   </p>
                   <p
                     className={`mt-1 text-xs uppercase tracking-wide ${
+                      booking.paymentStatus === "paid"
+                        ? "text-green-400"
+                        : booking.paymentStatus === "failed"
+                        ? "text-red-400"
+                        : "text-yellow-400"
+                    }`}
+                  >
+                    Payment: {booking.paymentStatus || "pending"}
+                  </p>
+                  <p
+                    className={`mt-1 text-xs uppercase tracking-wide ${
                       booking.status === "confirmed" ? "text-green-400" : "text-red-400"
                     }`}
                   >
