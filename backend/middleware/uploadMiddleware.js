@@ -13,9 +13,12 @@ if (hasCloudinaryConfig) {
   // Keep files in memory and upload to Cloudinary from controller.
   storage = multer.memoryStorage();
 } else {
-  const uploadPath = "./uploads";
+  const rootDir = path.resolve(process.cwd());
+  const uploadPath = fs.existsSync(path.join(rootDir, "backend"))
+    ? path.join(rootDir, "backend", "uploads")
+    : path.join(rootDir, "uploads");
   if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath);
+    fs.mkdirSync(uploadPath, { recursive: true });
   }
 
   storage = multer.diskStorage({

@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import connectDB from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -23,6 +24,9 @@ connectDB();
 
 const app = express();
 const __dirname = path.resolve();
+const uploadsDir = fs.existsSync(path.join(__dirname, "backend", "uploads"))
+  ? path.join(__dirname, "backend", "uploads")
+  : path.join(__dirname, "uploads");
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
@@ -38,7 +42,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(uploadsDir));
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "API is running" });
