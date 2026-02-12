@@ -5,6 +5,7 @@ import { getAllMovies, searchMovies } from "../services/movieService";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import MovieCardSkeleton from "../components/MovieCardSkeleton";
+import { resolveImageUrl } from "../utils/imageUrl";
 
 function Home() {
   const [movies, setMovies] = useState([]);
@@ -15,8 +16,6 @@ function Home() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = (searchParams.get("q") || "").trim();
-
-  const imageBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -60,7 +59,7 @@ function Home() {
         <div
           className="relative flex h-[55vh] w-full flex-col justify-end bg-cover bg-center px-5 pb-10 md:h-[70vh] md:px-10"
           style={{
-            backgroundImage: `url(${imageBase}/${(heroMovie.bannerUrl || heroMovie.posterUrl || "").replace(/\\\\/g, "/")})`,
+            backgroundImage: `url(${resolveImageUrl(heroMovie.bannerUrl || heroMovie.posterUrl)})`,
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
@@ -112,7 +111,7 @@ function Home() {
                   className="min-w-[140px] cursor-pointer text-left transition hover:scale-105 sm:min-w-[180px] md:min-w-[210px]"
                 >
                   <img
-                    src={`${imageBase}/${(movie.posterUrl || "").replace(/\\\\/g, "/")}`}
+                    src={resolveImageUrl(movie.posterUrl)}
                     className="h-[210px] w-full rounded-lg object-cover sm:h-[270px] md:h-[310px]"
                     alt={movie.title}
                   />

@@ -11,6 +11,7 @@ import {
   updateReview,
 } from "../services/reviewService";
 import { createBooking } from "../services/bookingService";
+import { resolveImageUrl } from "../utils/imageUrl";
 
 function MovieDetails() {
   const { id } = useParams();
@@ -27,7 +28,6 @@ function MovieDetails() {
   const [seats, setSeats] = useState(1);
   const [bookingMessage, setBookingMessage] = useState("");
   const [bookingLoading, setBookingLoading] = useState(false);
-  const imageBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const refreshReviews = async () => {
     const reviewData = await getReviewsByMovie(id);
@@ -154,7 +154,7 @@ function MovieDetails() {
 
         <div className="grid gap-6 md:grid-cols-2">
           <img
-            src={`${imageBase}/${(movie.posterUrl || "").replace(/\\\\/g, "/")}`}
+            src={resolveImageUrl(movie.posterUrl)}
             alt={movie.title}
             className="h-[440px] w-full rounded-lg object-cover"
           />

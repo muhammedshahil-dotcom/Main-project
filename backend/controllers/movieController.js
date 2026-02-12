@@ -2,6 +2,7 @@ import Movie from "../models/Movie.js";
 import Review from "../models/Review.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError from "../utils/appError.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const parseGenres = (genreValue) => {
   if (Array.isArray(genreValue)) return genreValue.map((g) => String(g).trim()).filter(Boolean);
@@ -19,8 +20,46 @@ const getReleaseYear = (releaseDate) => {
   return new Date(releaseDate).getFullYear();
 };
 
+const hasCloudinaryConfig =
+  !!process.env.CLOUDINARY_CLOUD_NAME &&
+  !!process.env.CLOUDINARY_API_KEY &&
+  !!process.env.CLOUDINARY_API_SECRET;
+
+if (hasCloudinaryConfig) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
+
+const uploadToCloudinary = async (file) => {
+  if (!file) return null;
+  const base64 = file.buffer.toString("base64");
+  const dataUri = `data:${file.mimetype};base64,${base64}`;
+  const uploaded = await cloudinary.uploader.upload(dataUri, {
+    folder: "cine-rate/movies",
+    public_id: `${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+    resource_type: "image",
+  });
+  return uploaded.secure_url;
+};
+
 export const addMovie = asyncHandler(async (req, res) => {
   const { title, description, genre, releaseDate } = req.body;
+
+  const posterUrl =
+    hasCloudinaryConfig && req.files?.poster?.[0]
+      ? await uploadToCloudinary(req.files.poster[0])
+      : req.files?.poster?.[0]?.path || null;
+  const bannerUrl =
+    hasCloudinaryConfig && req.files?.banner?.[0]
+      ? await uploadToCloudinary(req.files.banner[0])
+      : req.files?.banner?.[0]?.path || null;
+  const gallery =
+    hasCloudinaryConfig && req.files?.gallery?.length
+      ? await Promise.all(req.files.gallery.map((file) => uploadToCloudinary(file)))
+      : req.files?.gallery?.map((file) => file.path) || [];
 
   const movie = await Movie.create({
     title,
@@ -28,9 +67,9 @@ export const addMovie = asyncHandler(async (req, res) => {
     genre: parseGenres(genre),
     releaseDate,
     releaseYear: getReleaseYear(releaseDate),
-    posterUrl: req.files?.poster?.[0]?.path || null,
-    bannerUrl: req.files?.banner?.[0]?.path || null,
-    gallery: req.files?.gallery?.map((file) => file.path) || [],
+    posterUrl,
+    bannerUrl,
+    gallery,
   });
 
   res.status(201).json({
@@ -61,9 +100,21 @@ export const updateMovie = asyncHandler(async (req, res) => {
     ...(genre !== undefined && { genre: parseGenres(genre) }),
   };
 
-  if (req.files?.poster?.[0]) updateData.posterUrl = req.files.poster[0].path;
-  if (req.files?.banner?.[0]) updateData.bannerUrl = req.files.banner[0].path;
-  if (req.files?.gallery?.length) updateData.gallery = req.files.gallery.map((file) => file.path);
+  if (req.files?.poster?.[0]) {
+    updateData.posterUrl = hasCloudinaryConfig
+      ? await uploadToCloudinary(req.files.poster[0])
+      : req.files.poster[0].path;
+  }
+  if (req.files?.banner?.[0]) {
+    updateData.bannerUrl = hasCloudinaryConfig
+      ? await uploadToCloudinary(req.files.banner[0])
+      : req.files.banner[0].path;
+  }
+  if (req.files?.gallery?.length) {
+    updateData.gallery = hasCloudinaryConfig
+      ? await Promise.all(req.files.gallery.map((file) => uploadToCloudinary(file)))
+      : req.files.gallery.map((file) => file.path);
+  }
 
   const movie = await Movie.findByIdAndUpdate(req.params.id, updateData, {
     new: true,

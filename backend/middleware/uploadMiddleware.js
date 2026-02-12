@@ -2,21 +2,31 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Ensure uploads folder exists
-const uploadPath = "./uploads";
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath);
-}
+const hasCloudinaryConfig =
+  !!process.env.CLOUDINARY_CLOUD_NAME &&
+  !!process.env.CLOUDINARY_API_KEY &&
+  !!process.env.CLOUDINARY_API_SECRET;
 
-// Storage config
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+let storage;
+
+if (hasCloudinaryConfig) {
+  // Keep files in memory and upload to Cloudinary from controller.
+  storage = multer.memoryStorage();
+} else {
+  const uploadPath = "./uploads";
+  if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath);
   }
-});
+
+  storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+  });
+}
 
 // File filter (only images allowed)
 const fileFilter = (req, file, cb) => {
@@ -32,6 +42,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 export default upload;

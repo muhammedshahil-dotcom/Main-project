@@ -3,13 +3,13 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { AuthContext } from "../context/AuthContextBase";
 import { cancelBooking, getMyBookings } from "../services/bookingService";
+import { resolveImageUrl } from "../utils/imageUrl";
 
 const MyBookings = () => {
   const { token } = useContext(AuthContext);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const imageBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -66,7 +66,7 @@ const MyBookings = () => {
                 className="grid gap-4 rounded-lg border border-gray-800 bg-gray-900 p-4 md:grid-cols-[90px_1fr_auto]"
               >
                 <img
-                  src={`${imageBase}/${(booking.movie?.posterUrl || "").replace(/\\\\/g, "/")}`}
+                  src={resolveImageUrl(booking.movie?.posterUrl)}
                   alt={booking.movie?.title || "Movie"}
                   className="h-24 w-20 rounded object-cover"
                 />

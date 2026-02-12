@@ -4,6 +4,7 @@ import { deleteMovie } from "../../services/movieService";
 import { getAdminMovies } from "../../services/adminService";
 import { AuthContext } from "../../context/AuthContextBase";
 import AdminLayout from "../../components/AdminLayout";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 export default function ManageMovies() {
   const { token } = useContext(AuthContext);
@@ -59,7 +60,7 @@ export default function ManageMovies() {
           {movies.map((movie) => (
             <div key={movie._id} className="overflow-hidden rounded-xl border border-gray-800 bg-black/40">
               <img
-                src={`${import.meta.env.VITE_API_URL}/${(movie.posterUrl || "").replace(/\\\\/g, "/")}`}
+                src={resolveImageUrl(movie.posterUrl)}
                 className="h-64 w-full object-cover"
                 alt={movie.title}
               />
