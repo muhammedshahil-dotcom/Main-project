@@ -1,7 +1,6 @@
-import { createContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
-
-export const LoadingContext = createContext();
+import { LoadingContext } from "./LoadingContextBase";
 
 export const LoadingProvider = ({ children }) => {
   const [pendingRequests, setPendingRequests] = useState(0);

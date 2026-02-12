@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { addMovie } from "../services/movieService";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextBase";
 import AdminLayout from "../components/AdminLayout";
 
 export default function AddMovie() {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { getAllUsers, deleteUser } from "../services/UserService";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextBase";
 import AdminLayout from "../components/AdminLayout";
 
 function UserList() {

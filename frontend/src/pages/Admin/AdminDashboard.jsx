@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { getAdminStats } from "../../services/adminService";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../context/AuthContextBase";
 import AdminLayout from "../../components/AdminLayout";
 
 const AdminDashboard = () => {

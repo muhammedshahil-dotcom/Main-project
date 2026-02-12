@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { Menu, Search, User, X } from "lucide-react";
-import { AuthContext } from "../context/AuthContext";
-import logo from "../assets/1.png";
+import { AuthContext } from "../context/AuthContextBase";
+import logo from "../assets/logo.png";
 
 function Navbar() {
   const { user, logout } = useContext(AuthContext);

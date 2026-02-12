@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { LoadingContext } from "../context/LoadingContext";
+import { LoadingContext } from "../context/LoadingContextBase";
 
 const GlobalLoader = () => {
   const { isLoading } = useContext(LoadingContext);

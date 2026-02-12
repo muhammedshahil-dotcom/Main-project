@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { deleteReview } from "../../services/reviewService";
 import { getAdminReviews } from "../../services/adminService";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../context/AuthContextBase";
 import AdminLayout from "../../components/AdminLayout";
 
 const ManageReviews = () => {

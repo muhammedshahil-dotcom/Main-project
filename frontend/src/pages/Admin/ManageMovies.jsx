@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { deleteMovie } from "../../services/movieService";
 import { getAdminMovies } from "../../services/adminService";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../context/AuthContextBase";
 import AdminLayout from "../../components/AdminLayout";
 
 export default function ManageMovies() {
@@ -11,21 +11,21 @@ export default function ManageMovies() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchMovies = async () => {
-    try {
-      setError("");
-      const data = await getAdminMovies(token);
-      setMovies(data);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Failed to load movies");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        setError("");
+        const data = await getAdminMovies(token);
+        setMovies(data);
+      } catch (err) {
+        setError(err?.response?.data?.message || "Failed to load movies");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchMovies();
-  }, []);
+  }, [token]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure? This cannot be undone.")) return;
