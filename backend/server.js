@@ -14,7 +14,11 @@ import adminRoutes from "./routes/adminRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
-dotenv.config();
+// Support running from repo root or backend directory.
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+if (!process.env.MONGO_URI) {
+  dotenv.config({ path: path.resolve(process.cwd(), "backend/.env") });
+}
 connectDB();
 
 const app = express();
