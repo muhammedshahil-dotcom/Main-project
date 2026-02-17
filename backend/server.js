@@ -28,23 +28,22 @@ const uploadsDir = fs.existsSync(path.join(__dirname, "backend", "uploads"))
   ? path.join(__dirname, "backend", "uploads")
   : path.join(__dirname, "uploads");
 
-const defaultAllowedOrigins = [
+const allowlist = [
   "http://localhost:5173",
-  "http://localhost:3001",
-  "https://cinerate-e4c45ix2d-muhammedshahil-dotcoms-projects.vercel.app",
+  "http://localhost:3000",
+  ...(process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean)
+    : []),
 ];
 
-const envAllowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean)
-  : [];
-
-const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...envAllowedOrigins])];
+const previewDomainRegex =
+  /^https:\/\/cinerate-[a-z0-9-]+-muhammedshahil-dotcoms-projects\.vercel\.app$/;
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow server-to-server tools and same-origin requests with no Origin header.
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (allowlist.includes(origin)) return callback(null, true);
+    if (previewDomainRegex.test(origin)) return callback(null, true);
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
